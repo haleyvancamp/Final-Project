@@ -8,7 +8,12 @@
 #include "ofxAssimpModelLoader.h"
 
 #include "Math/MathUtils.h"
-
+/*  Haley Van Camp
+    Final Project
+    06/01/2015
+ 
+    Includes code from the ofxLeapMotion examples and the Simple 3D3 example
+ */
 #include "Utils/ofTrueTypeFontExt.h"
 #include "Utils/Cameras/ofxWalkingFirstPersonCamera.h"
 
@@ -38,26 +43,19 @@ class testApp : public ofBaseApp{
 	vector <int> fingersFound; 
 	ofEasyCam cam;
 	ofLight l1;
-	ofLight l2;
     ofLight light1;
 	ofMaterial m1;
     ofxFirstPersonCamera	camera;
-    
     ofTrueTypeFontExt		fontSmall;
-    
     ofMesh mesh;
-    
-    int h, w, xVal, yVal, zVal, zoo, index, xCam, yCam, zCam;
+    int h, w, xVal, yVal, zVal, index, xCam, yCam, zCam;
     float handAngle, snowDepth, temp;
-    
     float landscape [30] [30];
-    
-    
-    
     ofImage mountainPic;
-    
     ofxGIF::fiGifLoader avalanche;
     ofxAssimpModelLoader house;
+    ofxAssimpModelLoader tree;
+    ofxAssimpModelLoader tree2;
 	
 	map <int, ofPolyline> fingerTrails;
 };

@@ -1,3 +1,10 @@
+/*  Haley Van Camp
+    Final Project
+    06/01/2015
+ 
+    Includes code from the ofxLeapMotion examples and the Simple 3D3 example
+ */
+
 //^{
 //   <#code#>
 //}
@@ -15,27 +22,28 @@ cp -f ../../../addons/ofxLeapMotion/libs/lib/osx/libLeap.dylib "$TARGET_BUILD_DI
 //--------------------------------------------------------------
 void testApp::setup(){
 
-    ofSetFrameRate(60);
-    ofSetVerticalSync(true);
-	//ofSetLogLevel(OF_LOG_VERBOSE);
-
-    //mountainPic.loadImage("white_mountain.jpg");
-    avalanche.load("avalanche.gif");
-    house.loadModel("Farmhouse.obj");
     
-  
+    ofSetFrameRate(60); // sets framerate to 60 frames per second
+    ofSetVerticalSync(true); // prevents screen tearing
+	//ofSetLogLevel(OF_LOG_VERBOSE); // sets the logging level all messages are shown
+
+    mountainPic.loadImage("mountain2.jpg"); // loads image
+    avalanche.load("avalanche.gif"); // loads gif
+    house.loadModel("Farmhouse.obj"); // loads house model
+    tree.loadModel("Tree1-1.obj"); // loads tree model
+    tree2.loadModel("Tree1-1.obj"); // loads tree model
     
     // Give us a starting point for the camera
-    camera.setNearClip(0.01f);
-    camera.setPosition( 0, 4, 20 );
-    camera.setMovementMaxSpeed( 0.1f );
+    camera.setNearClip(0.01f); // sets near boundary for what's visible to the camera
+    camera.setPosition( 0, 4, 20 ); // sets position in x, y, z space
+    camera.setMovementMaxSpeed( 0.1f ); // sets max speed of camera
 
-	leap.open();
+	leap.open(); // listens for leap
     
-    fontSmall.loadFont("Fonts/DIN.otf", 8 );
+    fontSmall.loadFont("Fonts/DIN.otf", 8 ); // loads font
 
-	l1.setPosition(200, 300, 50);
-	l2.setPosition(-200, -200, 50);
+	l1.setPosition(ofGetWidth()/2, 200, 50); // sets position of light in x, y, z space
+	
 
 	
     //---------------------------------------------------------------
@@ -43,9 +51,9 @@ void testApp::setup(){
    
     h = 30; // initializing height for the height of the mesh
     w = 30; // initializing width for the width of the mesh
-    //zoo = -100;
     
-    // sets up vertices and colors of each mesh at i
+    
+    // sets up vertices and colors of the mesh
     for(int y=0; y<h; y++) {
         for(int x=0; x<w; x++) {
             mesh.addVertex(ofPoint((x-w/2), (y-h/2), 0));
@@ -66,28 +74,29 @@ void testApp::setup(){
             
         }
     }
-    
+    // sets static noise for the mesh by using a two deminsional array, landscape
     for(int y=0; y<h; y++) {
         for(int x=0; x<w; x++) {
-            landscape [x] [y] = ofNoise(x, y, 0.5 ); // Perlin noise value
+            landscape [x] [y] = ofNoise(x, y, 0.2 ); // Perlin noise value
         }
     }
     
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_NORMALIZE);
-    glEnable(GL_ALWAYS_SOFT_HINT_PGI);
+    glEnable(GL_DEPTH_TEST); // depth comparisons and updates depth buffer
+    glEnable(GL_NORMALIZE); // normalized to unit length
     setNormals(mesh); // sets normals to surface
-    l1.enable();
-    light1.enable();
-    light1.setSpecularColor(ofColor(255,255,255));
-    light1.setDiffuseColor(ofColor(255,255,255));
-    l1.setSpecularColor(ofColor(255,255,255));
-    l1.setDiffuseColor(ofColor(255,255,255));
+    l1.enable(); // enables light
+    light1.enable(); // enables light
+    l1.setDirectional(); // light is spread evenly from direction
+    light1.setSpecularColor(ofColor(255,255,255)); // uses color to separate reflection components
+    light1.setDiffuseColor(ofColor(255,255,255)); // diffuses reflection
+    l1.setSpecularColor(ofColor(255,255,255)); // uses color to separate reflection components
+    l1.setDiffuseColor(ofColor(255,255,255)); // diffuses reflection
+    // setting variables to a value
     yVal = 90;
     xVal = 0;
     zVal = 0;
-    light1.setPosition(ofGetWidth()/2, ofGetHeight()/2, 0);
+    light1.setPosition(ofGetWidth()/2, ofGetHeight()/2, 0); // sets position of light
     //l1.setPosition(800, 0, 0);
     
 }
@@ -95,23 +104,24 @@ void testApp::setup(){
 
 //--------------------------------------------------------------
 void testApp::update(){
-    light1.setOrientation(ofVec3f(xVal,yVal,zVal));
-    l1.setOrientation(ofVec3f(100, 100, 100));
+    light1.setOrientation(ofVec3f(xVal,yVal,zVal)); // sets what light is pointing at
+    l1.setOrientation(ofVec3f(100, 100, 100)); // sets what light is pointing at
     //camera.setOrientation(ofPoint(-20, 0, 0));
-	fingersFound.clear();
-    simpleHands = leap.getSimpleHands();
+	fingersFound.clear(); // clears previously saved fingers
+    simpleHands = leap.getSimpleHands(); // sets simpleHands to the hands found with leap
     
-    if( leap.isFrameNew() && simpleHands.size() ){
+    if( leap.isFrameNew() && simpleHands.size() ){ // makes sure frame is new
         
-        leap.setMappingX(-230, 230, -ofGetWidth()/2, ofGetWidth()/2);
-		leap.setMappingY(90, 490, -ofGetHeight()/2, ofGetHeight()/2);
-        leap.setMappingZ(-150, 150, -200, 200);
+        leap.setMappingX(-230, 230, -ofGetWidth()/2, ofGetWidth()/2); // maps leap input to our window on the x axis
+		leap.setMappingY(90, 490, -ofGetHeight()/2, ofGetHeight()/2); // maps leap input to our window on the y axis
+        leap.setMappingZ(-150, 150, -200, 200); // maps leap input to our window on the x axis
     
+        // looks through each hand
         for(int i = 0; i < simpleHands.size(); i++){
             
             ofVec3f position = simpleHands[i].handPos;
-            ofVec3f farthestFingPos = ofVec3f(0,0,0);
-            float farthestFingDis = 0;
+            ofVec3f farthestFingPos = ofVec3f(0,0,0); // setting variable to a value
+            float farthestFingDis = 0; // setting a varialbe to a value
             
             //look through every finger
             for(int j = 0; j < simpleHands[i].fingers.size(); j++){
@@ -119,35 +129,25 @@ void testApp::update(){
                 
                 //if the distance from the hand to this finger farther than the farthestFingDis
                 if(distance(position, simpleHands[i].fingers[j].pos) > farthestFingDis) {
-                    //if true, then update farhtestFingDis and farthestFingPos to that finger
+                    // then update farhtestFingDis and farthestFingPos to that finger
                     farthestFingPos = simpleHands[i].fingers[j].pos;
                     farthestFingDis = distance(position, simpleHands[i].fingers[j].pos);
                 }
-                
-                
-            
-
-               
-
-                
-                
-                //if the distance between the last point and the current point is too big - lets clear the line 
-                //this stops us connecting to an old drawing
-                
-                //add our point to our trail
-                
                 
                 //store fingers seen this frame for drawing
                 fingersFound.push_back(id);
             }
             
         //---------------------------------------------------------------
-            
+            // finds hand angle by using the distance between hand position and furthest finger position and the inverse of sin
             handAngle = asinf(abs(position.y - farthestFingPos.y)/farthestFingDis)*180/PI;
+            // finds snow depth by the y value of the hand position and "maps" it to realistic snow depth numbers
             snowDepth = (position.y + 500)/7;
+            // finds temperature by the x value of the hand position and "maps" it to realistic avalanche temperatures
             temp = (position.x +200)/10 -20;
 
             float time = ofGetElapsedTimef(); // time is equal to the amount of time passed
+            // updates mesh and changes z value by snowdepth
             for(int y=0; y<h; y++) {
                 for(int x=0; x<w; x++) {
                 // vertex index
@@ -156,7 +156,7 @@ void testApp::update(){
                     ofPoint pt = mesh.getVertex(i);
                     
                     pt.z = landscape [x] [y]*2; // assigns noise to the z value so the noise affects the z space of the mesh
-                    pt.z = ofMap(landscape [x] [y], 0, 1, 0, snowDepth/10);
+                    pt.z = ofMap(landscape [x] [y], 0, 1, 0, snowDepth/10); // z space is impacted by snowdepth (y value of hand position)
             
                                
                                 
@@ -165,20 +165,23 @@ void testApp::update(){
                 }
             }
             
-            setNormals(mesh); // updates the normals for each mesh at j
-            
+            setNormals(mesh); // updates the normals for mesh
+            // an avalanche only occurs when the hand angle is between 25, 45 degrees, the snow depth is greater than 20 in, and the temperature is above freezing (32)
             if((handAngle > 25) && (handAngle < 45) && (snowDepth > 20) && (temp > 32)) {
+                // starts updating gif
                 if(index == 0) {
                     index = 1;
                 }
+                // gif
                 if (ofGetElapsedTimeMillis() % 3){
                     if(index > 0) {
                        index++;
                     }
-                    
+                    // gif stops updating
                     if (index > avalanche.pages.size()-1) index = 0;
                 }
             }
+            // doesn't update gif so avalanche doesn't occur all the time
             else {
                 index = 0;
             }
@@ -193,66 +196,77 @@ void testApp::update(){
 
 //--------------------------------------------------------------
 void testApp::draw(){
-    //ofEnableDepthTest();
-	ofDisableLighting();
-    ofBackgroundGradient(ofColor(194, 192, 220), ofColor(163, 163, 169),  OF_GRADIENT_BAR);
-    //mountainPic.draw(0, -200, zoo);
-    ofSetColor(255, 255, 255, 255);
+	ofDisableLighting(); // disables light
+    mountainPic.draw(0, -200, 0); // draws image at a x,y location
+    ofSetColor(255, 255, 255, 255); // sets color to white
     
-//    house.enableColors();
-//    house.drawFaces();
-    
-    ofSetColor(255);
-    ofRectRounded(20, 250, 25, 200, 90);
-    ofCircle(55, 455, 23, 23);
-    ofSetColor(255, 0, 0);
-    ofRectRounded(22, ofMap(temp, -50, 80, 450, 250), 21, ofMap(temp, -50, 80, 0, 200), 90);
-    ofCircle(52, 455, 20, 20);
-    ofSetColor(255);
+    // draws the thermometer
+    ofSetColor(255); // sets white color to back of thermometer
+    ofRectRounded(20, 250, 25, 200, 90); // draws rounded rectangle
+    ofCircle(55, 455, 23, 23); // draws circle
+    ofSetColor(255, 0, 0); // sets color to red
+    ofRectRounded(22, ofMap(temp, -50, 80, 450, 250), 21, ofMap(temp, -50, 80, 0, 200), 90); // draws rounded rectangle
+    ofCircle(52, 455, 20, 20); // draws circle
+    ofSetColor(255); // sets color back to white
 
-    ofEnableDepthTest();
+    ofEnableDepthTest(); // begins depth buffer
+    //draws avalanche gif when the index is greater than 0
     if(index > 0) {
        avalanche.pages[index].draw(0, 0);
     }
     
-    //house.setPosition(ofGetWidth()/2, ofGetHeight()/2, 0);
-    house.setScale(0.01, 0.01, 0.01);
-    light1.draw();
-    l1.draw();
+    house.setScale(0.01, 0.01, 0.01); // sets scale of house model
+    tree.setScale(0.02, 0.02, 0.02); // sets scale of trees
+    tree2.setScale(0.02, 0.02, 0.02); // sets scale of trees
+    //light1.draw(); // draws the light
+    //l1.draw(); // draws the light
 	
     
-	ofSetColor(0);
+	ofSetColor(0); // sets color to black
+    // if hand angle is between 25 and 45, the font color changes to red based on hand angle
     if(handAngle < 45) {
         ofSetColor(ofMap(handAngle, 0, 45, 0, 255), 0, 0);
     }
     else {
         ofSetColor(ofMap(handAngle, 45, 90, 255, 0), 0, 0);
     }
-	ofDrawBitmapString("Slope: " + ofToString((int)handAngle) + " degrees", 20, 20);
-    ofSetColor(ofMap(snowDepth, 0, 80, 0, 255), 0, 0);
-    ofDrawBitmapString("Snow Depth: " + ofToString((int)snowDepth) + " inches", 20, 40);
-    ofSetColor(ofMap(temp, -50, 80, 0, 255), 0, 0);
-    ofDrawBitmapString("Temperature: " + ofToString((int)temp) + " degrees F", 20, 60);
+	ofDrawBitmapString("Slope: " + ofToString((int)handAngle) + " degrees", 20, 20); // draws string
+    ofSetColor(ofMap(snowDepth, 0, 80, 0, 255), 0, 0); // different values of red depending on snow depth
+    ofDrawBitmapString("Snow Depth: " + ofToString((int)snowDepth) + " inches", 20, 40); // draws string
+    ofSetColor(ofMap(temp, -50, 80, 0, 255), 0, 0); // different values of red depending on temp
+    ofDrawBitmapString("Temperature: " + ofToString((int)temp) + " degrees F", 20, 60); // draws string
     
 
-	cam.begin();
+	cam.begin(); // starts camera
 
-    ofSetColor(200);
-	ofEnableLighting();
+    ofSetColor(200); // sets color to grey
+	ofEnableLighting(); // enables light
     light1.enable();
     l1.enable();
-//	l2.enable();
-    house.enableColors();
-    house.enableMaterials();
-	m1.begin();
-	m1.setShininess(0.6);
-    camera.begin();
+    //house.enableColors();
+    //house.enableMaterials();
+	m1.begin(); // starts material
+	m1.setShininess(0.6); // adds shininess
+    camera.begin(); // starts other camera
     
     ofPushMatrix();
-    ofRotate(180-handAngle, -1, 0, 0); // rotates the mesh so it's on the 'floor'
-    ofTranslate(0, 0, -2);
-    house.drawFaces();
+    ofRotate(180-handAngle, -1, 0, 0); // rotates the house so it's on the mesh and changes with hand angle
+    ofTranslate(0, 2, -2); // translates so it sits on the mesh
+    house.drawFaces(); // draws the house model
     ofPopMatrix();
+    
+    ofPushMatrix();
+    ofRotate(180-handAngle, -90, 0, 0); // rotates the trees so they're on the mesh
+    ofTranslate(-5, 2, -2); // translates so they sit on the mesh
+    tree.drawFaces(); // draws the tree models
+    ofPopMatrix();
+    
+    ofPushMatrix();
+    ofRotate(180-handAngle, -90, 0, 0); // rotates the trees so they're on the mesh
+    ofTranslate(5, 2, -2); // translates so they sit on the mesh
+    tree2.drawFaces(); // draws the tree models
+    ofPopMatrix();
+    
     
     ofPushMatrix();
     ofRotate(90-handAngle, -1, 0, 0); // rotates the mesh so it's on the 'floor'
@@ -260,27 +274,28 @@ void testApp::draw(){
     mesh.draw(); // draws the mesh
     ofPopMatrix();
     
-    camera.end();
+    camera.end(); // stops camera
     
     
-    ofSetColor( ofColor::white );
-    ofDisableDepthTest();
+    ofSetColor( ofColor::white ); // sets color to white
+    ofDisableDepthTest(); // stops depth buffer
 
     
     for(int i = 0; i < simpleHands.size(); i++){
-        simpleHands[i].debugDraw();
+        simpleHands[i].debugDraw(); // draws hands
     }
 
-    light1.disable();
+    light1.disable(); // disables light
     l1.disable();
-    m1.end();
-	cam.end();
+    m1.end(); // ends material
+	cam.end(); // ends camera
     
    
 	
 }
 //--------------------------------------------------------------
 float testApp::distance(ofVec3f point1, ofVec3f point2){
+    // method to calculate the distance
     return sqrtf((point1.x-point2.x)*(point1.x-point2.x) + (point1.y-point2.y)*(point1.y-point2.y) +
                  (point1.z-point2.z)*(point1.z-point2.z));
 }
@@ -331,31 +346,8 @@ void testApp::setNormals( ofMesh &mesh ){
 }
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
-//    if(key == ' ') {
-//        camera.setPosition(ofPoint(xCam, yCam, zCam));
-//        if(key == OF_KEY_RIGHT) {
-//            xCam += 10;
-//        }
-//        if(key == OF_KEY_LEFT) {
-//            xCam -= 10;
-//        }
-//        if(key == OF_KEY_UP) {
-//            yCam += 10;
-//        }
-//        if(key == OF_KEY_DOWN) {
-//            yCam -= 10;
-//        }
-//        if(key == 'o') {
-//            zCam += 10;
-//        }
-//        if(key == 'i') {
-//            zCam -= 10;
-//        }
-//    }
- //    if(key == ' ') {
-//        zoo--;
-//    }
-//
+// commands to set light
+
 //      if(key == 't')
 //      {
 //          yVal+=10;
