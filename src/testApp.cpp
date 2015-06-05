@@ -40,7 +40,7 @@ void testApp::setup(){
 
 	leap.open(); // listens for leap
     
-    fontSmall.loadFont("Fonts/DIN.otf", 8 ); // loads font
+    ttFont.loadFont("Arial Rounded Bold.ttf", 24); // loads font
 
 	l1.setPosition(ofGetWidth()/2, 200, 50); // sets position of light in x, y, z space
 	
@@ -197,6 +197,7 @@ void testApp::update(){
 //--------------------------------------------------------------
 void testApp::draw(){
 	ofDisableLighting(); // disables light
+    
     mountainPic.draw(0, -200, 0); // draws image at a x,y location
     ofSetColor(255, 255, 255, 255); // sets color to white
     
@@ -230,11 +231,11 @@ void testApp::draw(){
     else {
         ofSetColor(ofMap(handAngle, 45, 90, 255, 0), 0, 0);
     }
-	ofDrawBitmapString("Slope: " + ofToString((int)handAngle) + " degrees", 20, 20); // draws string
+    ttFont.drawString("Slope: " + ofToString((int)handAngle) + " degrees", 20, 46); // draws string
     ofSetColor(ofMap(snowDepth, 0, 80, 0, 255), 0, 0); // different values of red depending on snow depth
-    ofDrawBitmapString("Snow Depth: " + ofToString((int)snowDepth) + " inches", 20, 40); // draws string
+    ttFont.drawString("Snow Depth: " + ofToString((int)snowDepth) + " inches", 20, 84); // draws string
     ofSetColor(ofMap(temp, -50, 80, 0, 255), 0, 0); // different values of red depending on temp
-    ofDrawBitmapString("Temperature: " + ofToString((int)temp) + " degrees F", 20, 60); // draws string
+    ttFont.drawString("Temperature: " + ofToString((int)temp) + " degrees F", 20, 122); // draws string
     
 
 	cam.begin(); // starts camera
@@ -285,10 +286,13 @@ void testApp::draw(){
         simpleHands[i].debugDraw(); // draws hands
     }
 
+   
+    
     light1.disable(); // disables light
     l1.disable();
     m1.end(); // ends material
 	cam.end(); // ends camera
+    
     
    
 	

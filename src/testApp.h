@@ -46,7 +46,7 @@ class testApp : public ofBaseApp{
     ofLight light1;
 	ofMaterial m1;
     ofxFirstPersonCamera	camera;
-    ofTrueTypeFontExt		fontSmall;
+    ofTrueTypeFont ttFont;
     ofMesh mesh;
     int h, w, xVal, yVal, zVal, index, xCam, yCam, zCam;
     float handAngle, snowDepth, temp;
